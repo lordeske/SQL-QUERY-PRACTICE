@@ -98,4 +98,51 @@ where NAZIV = 'Programski jezici')))
 
 
 
+/*Dodati podatke o izbornom predmetu Telekomunikacije koji nosi 6 ESPB.*/
+INSERT INTO predmet
+values ('1234' , '4242' , 'Telekomunikacije' , 'izborni')
 
+
+
+/*Prikazati spisak studenata koji su birali predmet Objektno programiranje 1*/  
+select *
+from student , predmet, student_predmet
+where student.ID_STUDENTA = student_predmet.ID_STUDENTA
+      and predmet.ID_PREDMETA = student_predmet.ID_PREDMETA
+
+and NAZIV = 'Objektno programiranje 1'
+
+
+
+/*Za predmet Programiranje mobilnih uređaja dodeliti profesora Vladimira Vuletića.*/
+update predmet
+set ID_PROFESORA = (select ID_PROFESORA 
+from profesor
+where ime in ('Vladimir') and PREZIME in ('Vuletić'))
+where ID_PREDMETA in (select ID_PREDMETA
+from predmet
+where NAZIV = 'Programiranje mobilnih uređaja')
+
+
+
+/*Prikazati naziv predmeta, zvanje, ime i prezime profesora i datum održavanja
+ispita za sve ispite koji su se održali u vanrednim ispitnim rokovima*/
+select profesor.IME , profesor.PREZIME , zvanje, predmet.NAZIV
+from profesor, ispit , predmet
+
+where profesor.ID_PROFESORA = predmet.ID_PROFESORA and
+predmet.ID_PREDMETA = ispit.ID_PREDMETA
+
+and  ID_ROKA in (select ID_ROKA
+from ispitni_rok
+where STATUS_ROKA in ('vanredni'))
+
+
+
+
+
+
+/*Написати SQL упит који креира нову табелу са произвољним називом
+и у њу ископирати записе о студентима који су остварили више од 30 ESPB бодова.*/
+
+--///--- nisam  uradio
