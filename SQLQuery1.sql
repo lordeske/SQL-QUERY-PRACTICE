@@ -61,3 +61,46 @@ as
 select * 
 from ispitni_rok
 where STATUS_ROKA in ('redovni')
+
+
+
+6. Kreirati pogled koji prikazuje ime,prezime i kvalifikaciju izvršilaca i nazive projekata na kojima
+rade.
+CREATE VIEW Izvrsioci_projekti
+as
+SELECT ime,prezime,kvalif,naziv
+FROM IZVRSILAC,UCESCE,PROJEKAT
+WHERE IZVRSILAC.idIzvrsilac=UCESCE.idIzvrsilac AND
+UCESCE.idProjekat=PROJEKAT.idProjekat
+7. Kreirati pogled koji prikazuje izvršioce koji ne rade ni na jednom projektu.
+CREATE VIEW izvrsioci_bez_projekta
+as
+SELECT *
+FROM IZVRSILAC
+WHERE idIzvrsilac NOT IN (SELECT idIzvrsilac FROM UCESCE)
+8. Kreirati pogled koji prikazuje projekte na kojima ne radi nijedan izvršilac.
+CREATE VIEW projekti_bez_izvrsilaca
+as
+SELECT *
+FROM PROJEKAT
+WHERE idProjekat NOT IN (SELECT idProjekat FROM UCESCE)
+
+
+
+1. Kreirati funkciju fun_Staz koja vraća godine staza izvršioca čije se ime i prezime zadaju.
+● Prikazati koliko godina staža ima Rastko Simić koristeći funkciju fun_Radnik_Staz.
+● Kreirati upit koji prikazuje ime,prezime i godine staža svih izvršilaca primenom
+funkcije.
+Create function fun_SumStaz(@ime nchar(30), @prezime nchar(30)) returns int
+as begin
+declare @sumStaza int
+Select @sumStaza = SUM(datediff(yy,dat_zap,getdate())) FROM IZVRSILAC
+WHere ime=@ime and prezime=@prezime
+return @sumStaza end
+----------------------------------------------------------------------------------------------------------------
+SELECT dbo.fun_SumStaz('Rastko','Simić') as UkupanStaz
+—-------------------------------------------------------------------------------------------------------------
+select ime,prezime, dbo.fun_SumStaz(ime,prezime) as GodineStaza from IZVRSILAC
+
+
+
