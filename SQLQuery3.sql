@@ -1,4 +1,4 @@
-create view view_plata_Naknada as
+﻿create view view_plata_Naknada as
 
 select * from (
 select ime, prezime , cenaPoSatu,
@@ -38,7 +38,7 @@ from PROJEKAT where naziv !='Uvoz'))
 
 
 
-/*1. ?????? ????? ????????? ?????? ???????????? ?? ?? ??????.*/
+/**/
 insert into profesor 
 (ime,PREZIME,ZVANJE ,DATUM_ZAP)
 values ('Vesna', 'Veselinovic', 'dr' , GETDATE())
@@ -46,16 +46,67 @@ values ('Vesna', 'Veselinovic', 'dr' , GETDATE())
 select* from profesor
 where ime in ('Vesna')
 
-/*2. ????????? ????????? ?? ???????? ???????? ??????????? ? ????????? ?????????
-????????*/
+/*1.Променити професора на предмету Аналогна електроника и поставити Владимира
+Вулетића.v*/
 
 update predmet
 set ID_PROFESORA = (select ID_PROFESORA
 from profesor
 where ime in ('Vladimir')
-and PREZIME in ('Vuleti?'))
+and PREZIME in ('Vuletic'))
 where ID_PREDMETA in (select ID_PREDMETA
 from predmet
 where NAZIV in ('Analogna elektronika'))
 
 
+/*Приказати студенте који су изабрали предмете у вредности од 30 или више ЕСПБ у
+школској години 2019/20.*/
+
+select student.IME , student.PREZIME , sum(espb)
+from student , student_predmet ,predmet
+where student.ID_STUDENTA = student_predmet.ID_STUDENTA and
+predmet.ID_PREDMETA = student_predmet.ID_PREDMETA
+and SKOLSKA_GODINA in ('2019/20')
+group by student.IME , student.PREZIME
+having sum(espb)>=30
+
+
+
+/*4. Приказати предмет са најнижом просечном оценом*/
+SELECT predmet.NAZIV , AVG(zapisnik.ocena)
+FROM predmet , ispit, zapisnik
+where
+predmet.ID_PREDMETA = ispit.ID_PREDMETA and
+ispit.ID_ISPITA = zapisnik.ID_ISPITA
+GROUP BY predmet.NAZIV
+ORDER BY AVG(zapisnik.ocena) asc
+
+
+/*Професору који предаје предмет Објектно програмирање 2 доделити и предмет
+Микропроцесорски софтвер*/
+UPDATE predmet
+set ID_PROFESORA = (select profesor.ID_PROFESORA
+from predmet , profesor
+where predmet.ID_PROFESORA = profesor.ID_PROFESORA
+and NAZIV in ('Objektno programiranje 2'))
+where ID_PREDMETA = (select ID_PREDMETA
+from predmet
+where NAZIV in ('Mikroprocesorski softver')
+)
+
+
+
+/*Написати функцију која враћа просечну оцену на смеру.*/
+create function prosecaOcena (@smer nchar(5))
+returns float
+as begin
+declare @prosecnaOcena float
+select @prosecnaOcena =  AVG(ocena)
+from zapisnik , student
+where zapisnik.ID_STUDENTA = student.ID_STUDENTA
+and smer = @smer
+return @prosecnaOcena
+end
+
+
+SELECT dbo.pro
