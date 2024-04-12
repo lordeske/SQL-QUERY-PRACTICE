@@ -182,4 +182,40 @@ select dbo.fun_Student_prosek ('IS',25,2019)
 
 /*Kreirati funkciju fun_narucilac_projekat koja za zadati id naručioca 
 vraća listu njegovih
-projekata.*/create function fun_narucilac_projekat (@idnarcioca int)returns tableas return(select idProjekat , nazivfrom PROJEKATwhere idNarucilac = @idnarcioca)select * from fun_narucilac_projekat ('1')
+projekata.*/create function fun_narucilac_projekat (@idnarcioca int)returns tableas return(select idProjekat , nazivfrom PROJEKATwhere idNarucilac = @idnarcioca)select * from fun_narucilac_projekat ('1')/*Kreirati funkciju fun_isplacena_sredstva koja za zadati jmbg izvršioca vraća ukupna
+isplaćena sredstva tom izvršiocu.*/Create function un_isplacena_sredstva (@jmbg char(13))
+returns float
+as begin
+DECLARE @Ukupno float
+Select @UKUPNO=SUM(iznos)
+FROM ISPLATA
+WHERE idIzvrsilac= (SELECT idIzvrsilac FROM IZVRSILAC WHERE jmbg=@jmbg)
+return @UKUPNO
+end
+
+
+/*Kreirati funkciju fun_Mesec koja za zadati mesec prikazuje ime i prezime i jmbg
+izvršilaca koji su se zaposlili tog meseca.*/
+
+create function fun_Mesec (@mesec int)
+returns table
+as return
+(select ime , prezime, jmbg
+from IZVRSILAC
+where MONTH(dat_zap) = @mesec)
+
+
+/* Kreirati funkciju fun_Staz koja vraća godine staza izvršioca čije se 
+ime i prezime zadaju.
+*/
+
+create function fun_staza (@ime nchar(30) , @prezime nchar(30))
+returns int
+as begin
+declare @sumaStaza int
+select @sumaStaza =  sum(datediff(yy,dat_zap,getdate())) 
+from IZVRSILAC
+where ime = @ime 
+and prezime = @prezime
+return @sumaStaza
+end
