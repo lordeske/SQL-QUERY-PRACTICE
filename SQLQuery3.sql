@@ -108,5 +108,49 @@ and smer = @smer
 return @prosecnaOcena
 end
 
+/*Приказати студенте РТ смера чија је оцена већа од просечне оцене на том смеру.*/
+select ime,PREZIME, SMER , OCENA
+from student, zapisnik 
+where student.ID_STUDENTA = zapisnik.ID_STUDENTA	and
+SMER in ('RT')
+group by ime,PREZIME, SMER ,OCENA
+having OCENA > (select avg(ocena)
+from zapisnik, student
+where zapisnik.ID_STUDENTA = student.ID_STUDENTA
+and SMER in ('RT'))
 
-SELECT dbo.pro
+
+/*8. Приказати укупна исплаћена средства извршиоцима који су ангажовани на пројекту
+Имплементација*/
+
+
+select idIzvrsilac
+from IZVRSILAC
+where 
+
+
+/*Написати функцију која враћа просечну цену рада по сату*/
+create function po_satu ()
+returns float
+as begin
+declare @prosek float
+select @prosek = AVG(cenaPoSatu)
+from IZVRSILAC
+return @prosek
+end
+
+
+
+/*иказати извршиоце чија је цена рада по сату већа од просечне цене рада по сату.*/
+
+select *
+from IZVRSILAC
+where cenaPoSatu > (select AVG(cenaPoSatu)
+from IZVRSILAC
+)
+
+
+
+
+
+
