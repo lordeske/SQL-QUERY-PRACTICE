@@ -176,3 +176,40 @@ BEGIN
         THROW;
     END CATCH
 END;
+
+
+
+
+
+
+create procedure sp_izvrsilac_projekat (@nazviProj nchar(30),@ime nchar(30),@prezime
+as
+begin
+declare @flgOnprject int
+Select @flgOnprject=count(*)from ucesce
+nchar(30))
+where idIzvrsilac=(select idIzvrsilac from IZVRŠILAC where ime=@ime and prezime=@prezime) and
+idProjekat=(select idProjekat from projekat where naziv=@nazviProj )
+if @flgOnprject=0
+begin
+insert into UCESCE(idIzvrsilac,idProjekat)
+values((select idIzvrsilac from IZVRŠILAC where ime=@ime and prezime=@prezime), (SELECT
+idProjekat from projekat where naziv=@nazviProj ))
+end
+End
+/* Pozivanje procedure */
+Exec sp_izvrsilac_projekat ’Projektovanje’ , ’Dalibor’ , ’Grgurović’
+
+
+2.Kreirati uskladištenu proceduru sp_Promeni_Cenu koja menja cenu rada po satu za izvršioca čije se
+ime, prezime zadaju. Procedura prima i parametar o procentu za koji se cena menja.
+Create procedure sp_Promeni_Cenu ( @ime varchar(30), @prezime varchar(30), @procenat int)
+as
+begin
+update IZVRSILAC
+set cenaPoSatu=cenaPoSatu+cenaPoSatu*@procenat/100 where ime=@ime and prezime=@prezime
+End
+/* Pozivanje procedure */
+exec sp_promeni_platu 'Rastko' , 'Simić', 5
+
+
