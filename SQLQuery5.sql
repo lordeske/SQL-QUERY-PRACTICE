@@ -82,3 +82,97 @@ select 'Nije promenjena cena';
 end
 -------------------
 exec sp_Promena_Cena 'Dalibor', 'Grgurović', 3
+
+
+
+CREATE PROCEDURE sp_novaOJ
+    @ime NVARCHAR(50),
+    @prezime NVARCHAR(50),
+    @pozicija NVARCHAR(50)
+AS
+BEGIN
+    -- Započinjanje transakcije
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Dodavanje novog izvršioca u tabelu izvrsilac
+        DECLARE @izvrsilac_id INT;
+
+        INSERT INTO izvrsilac (ime, prezime, pozicija)
+        VALUES (@ime, @prezime, @pozicija);
+
+        -- Dohvatanje ID-a novo dodatog izvršioca
+        SELECT @izvrsilac_id = SCOPE_IDENTITY();
+
+        -- Kreiranje nove organizacione jedinice "Ljudski resursi" i postavljanje izvršioca za šefa
+        INSERT INTO organizacija (naziv, sef_id)
+        VALUES ('Ljudski resursi', @izvrsilac_id);
+
+        -- Ako su sve operacije uspešne, potvrdi transakciju
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Ako je došlo do greške, poništi transakciju
+        ROLLBACK TRANSACTION;
+
+        -- Bacanje greške kako bi bila vidljiva van procedure
+        THROW;
+    END CATCH
+END;
+
+
+
+CREATE PROCEDURE sp_raspodela_sredstava
+    @nazivProjekta NVARCHAR(100),
+    @procenat DECIMAL(5, 2)
+AS
+BEGIN
+    -- Započinjanje transakcije
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Deklaracija potrebnih promenljivih
+        DECLARE @projekat_id INT;
+        DECLARE @trenutniBudzet DECIMAL(18, 2);
+        DECLARE @umanjeniIznos DECIMAL(18, 2);
+        DECLARE @brojProjekata INT;
+        DECLARE @povecanjePoProjektu DECIMAL(18, 2);
+
+        -- Dohvatanje ID-a i trenutnog budžeta projekta kome se umanjuje budžet
+        SELECT @projekat_id = projekat_id, 
+               @trenutniBudzet = budzet
+        FROM projekti
+        WHERE naziv = @nazivProjekta;
+
+        -- Izračunavanje umanjenog iznosa
+        SET @umanjeniIznos = @trenutniBudzet * (@procenat / 100);
+
+        -- Umanjenje budžeta projekta
+        UPDATE projekti
+        SET budzet = budzet - @umanjeniIznos
+        WHERE projekat_id = @projekat_id;
+
+        -- Dohvatanje broja projekata osim onog kome se umanjuje budžet
+        SELECT @brojProjekata = COUNT(*)
+        FROM projekti
+        WHERE projekat_id <> @projekat_id;
+
+        -- Izračunavanje iznosa koji će biti dodan svakom preostalom projektu
+        SET @povecanjePoProjektu = @umanjeniIznos / @brojProjekata;
+
+      
+        UPDATE projekti
+        SET budzet = budzet + @povecanjePoProjektu
+        WHERE projekat_id <> @projekat_id;
+
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        
+        ROLLBACK TRANSACTION;
+
+        
+        THROW;
+    END CATCH
+END;

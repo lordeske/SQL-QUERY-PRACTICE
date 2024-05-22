@@ -138,3 +138,21 @@ BEGIN
     FROM 
         inserted;
 END;
+
+
+CREATE TRIGGER trig_ObrisiSaProjekta
+ON Ucesca
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Listing (ime, prezime, naziv_projekta, datum)
+    SELECT 
+        deleted.ime,
+        deleted.prezime,
+        deleted.naziv_projekta,
+        GETDATE()
+    FROM 
+        deleted;
+END;
