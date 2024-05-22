@@ -144,5 +144,10 @@ where STATUS_ROKA in ('vanredni'))
 
 /*Написати SQL упит који креира нову табелу са произвољним називом
 и у њу ископирати записе о студентима који су остварили више од 30 ESPB бодова.*/
-
---///--- nisam  uradio
+create table nekaTabela
+select ime , PREZIME , sum(espb)
+from student , predmet ,student_predmet
+where student.ID_STUDENTA = student_predmet.ID_STUDENTA and
+predmet.ID_PREDMETA = student_predmet.ID_PREDMETA
+group by ime , PREZIME
+having SUM(espb) > 30
